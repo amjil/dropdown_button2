@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   meta: ^1.9.1
+  mongol: ^7.0.0
 
 dev_dependencies:
   flutter_test:

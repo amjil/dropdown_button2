@@ -103,8 +103,8 @@ class IconStyleData {
 class DropdownStyleData {
   /// Creates a DropdownStyleData.
   const DropdownStyleData({
-    this.maxHeight,
-    this.width,
+    this.maxWidth,
+    this.height,
     this.padding,
     this.scrollPadding,
     this.decoration,
@@ -129,10 +129,10 @@ class DropdownStyleData {
   /// If this property is set above the maximum allowable height threshold
   /// mentioned above, then the menu defaults to being padded at the top
   /// and bottom of the menu by at one menu item's height.
-  final double? maxHeight;
+  final double? maxWidth;
 
   /// The width of the dropdown menu
-  final double? width;
+  final double? height;
 
   /// The inner padding of the dropdown menu
   ///
@@ -275,11 +275,11 @@ class DropdownSearchData<T> {
   const DropdownSearchData({
     this.searchController,
     this.searchBarWidget,
-    this.searchBarWidgetHeight,
+    this.searchBarWidgetWidth,
     this.noResultsWidget,
     this.searchMatchFn,
   }) : assert(
-          (searchBarWidget == null) == (searchBarWidgetHeight == null),
+          (searchBarWidget == null) == (searchBarWidgetWidth == null),
           'searchBarWidgetHeight should not be null when using searchBarWidget\n'
           'This is necessary to properly determine menu limits and scroll offset',
         );
@@ -293,7 +293,7 @@ class DropdownSearchData<T> {
   final Widget? searchBarWidget;
 
   /// The height of the searchBarWidget if used.
-  final double? searchBarWidgetHeight;
+  final double? searchBarWidgetWidth;
 
   /// The widget to show when the search results are empty.
   final Widget? noResultsWidget;

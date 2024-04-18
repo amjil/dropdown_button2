@@ -10,8 +10,8 @@ class DropdownItem<T> extends _DropdownMenuItemContainer {
   /// The [child] property must be set.
   const DropdownItem({
     required super.child,
-    super.height,
-    super.intrinsicHeight,
+    super.width,
+    super.intrinsicWidth,
     super.alignment,
     this.onTap,
     this.value,
@@ -41,8 +41,8 @@ class DropdownItem<T> extends _DropdownMenuItemContainer {
   /// Creates a copy of this DropdownItem but with the given fields replaced with the new values.
   DropdownItem<T> copyWith({
     Widget? child,
-    double? height,
-    bool? intrinsicHeight,
+    double? width,
+    bool? intrinsicWidth,
     void Function()? onTap,
     T? value,
     bool? enabled,
@@ -50,8 +50,8 @@ class DropdownItem<T> extends _DropdownMenuItemContainer {
     bool? closeOnTap,
   }) {
     return DropdownItem<T>(
-      height: height ?? this.height,
-      intrinsicHeight: intrinsicHeight ?? this.intrinsicHeight,
+      width: width ?? this.width,
+      intrinsicWidth: intrinsicWidth ?? this.intrinsicWidth,
       onTap: onTap ?? this.onTap,
       value: value ?? this.value,
       enabled: enabled ?? this.enabled,
@@ -71,10 +71,10 @@ class _DropdownMenuItemContainer extends StatelessWidget {
   /// The [child] argument is required.
   const _DropdownMenuItemContainer({
     super.key,
-    this.alignment = AlignmentDirectional.centerStart,
+    this.alignment = AlignmentDirectional.topCenter,
     required this.child,
-    this.height = _kMenuItemHeight,
-    this.intrinsicHeight = false,
+    this.width = _kMenuItemWidth,
+    this.intrinsicWidth = false,
   });
 
   /// The widget below this widget in the tree.
@@ -95,7 +95,7 @@ class _DropdownMenuItemContainer extends StatelessWidget {
   final AlignmentGeometry alignment;
 
   /// The height of the menu item, default value is [kMinInteractiveDimension]
-  final double height;
+  final double width;
 
   /// If set to true, then this item's height will vary according to its
   /// intrinsic height instead of using [height] property.
@@ -104,12 +104,12 @@ class _DropdownMenuItemContainer extends StatelessWidget {
   /// no way to know the item's intrinsic height in-advance to properly scroll to
   /// the selected item. Instead, the provided [height] value will be used, which means
   /// the menu's initial scroll offset may not properly scroll to the selected item.
-  final bool intrinsicHeight;
+  final bool intrinsicWidth;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: intrinsicHeight ? null : height,
+      width: intrinsicWidth ? null : width,
       alignment: alignment,
       child: child,
     );
@@ -157,7 +157,7 @@ class _DropdownItemButtonState<T> extends State<_DropdownItemButton<T>> {
     if (focused && inTraditionalMode) {
       final _MenuLimits menuLimits = widget.route.getMenuLimits(
         widget.buttonRect,
-        widget.constraints.maxHeight,
+        widget.constraints.maxWidth,
         widget.mediaQueryPadding,
         widget.itemIndex,
       );

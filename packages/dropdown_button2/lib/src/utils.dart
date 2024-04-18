@@ -32,26 +32,26 @@ double _clampDouble(double x, double min, double max) {
 /// The [separatorHeight] property is the height of the separator.
 ///
 /// Returns a new list of heights with separators added.
-List<double> addSeparatorsHeights({
-  required List<double> itemHeights,
-  required double? separatorHeight,
+List<double> addSeparatorsWidths({
+  required List<double> itemWidths,
+  required double? separatorWidth,
 }) {
-  final List<double> heights = [];
+  final List<double> widths = [];
 
   bool addSeparator = false;
-  if (separatorHeight != null) {
-    for (final item in itemHeights) {
+  if (separatorWidth != null) {
+    for (final item in itemWidths) {
       if (addSeparator) {
-        heights.add(separatorHeight);
+        widths.add(separatorWidth);
       }
-      heights.add(item);
+      widths.add(item);
       addSeparator = true;
     }
   } else {
-    heights.addAll(itemHeights);
+    widths.addAll(itemWidths);
   }
 
-  return heights;
+  return widths;
 }
 
 // ignore: public_member_api_docs

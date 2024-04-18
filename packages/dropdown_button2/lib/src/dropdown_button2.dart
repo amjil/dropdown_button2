@@ -21,9 +21,9 @@ part 'enums.dart';
 part 'utils.dart';
 
 const Duration _kDropdownMenuDuration = Duration(milliseconds: 300);
-const double _kMenuItemHeight = kMinInteractiveDimension;
-const double _kDenseButtonHeight = 24.0;
-const EdgeInsets _kMenuItemPadding = EdgeInsets.symmetric(horizontal: 16.0);
+const double _kMenuItemWidth = kMinInteractiveDimension;
+const double _kDenseButtonWidth = 24.0;
+const EdgeInsets _kMenuItemPadding = EdgeInsets.symmetric(vertical: 16.0);
 const EdgeInsetsGeometry _kAlignedButtonPadding =
     EdgeInsetsDirectional.only(start: 16.0, end: 4.0);
 const EdgeInsets _kUnalignedButtonPadding = EdgeInsets.zero;
@@ -108,7 +108,7 @@ class DropdownButton2<T> extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.enableFeedback,
-    this.alignment = AlignmentDirectional.centerStart,
+    this.alignment = AlignmentDirectional.topCenter,
     this.buttonStyleData,
     this.iconStyleData = const IconStyleData(),
     this.dropdownStyleData = const DropdownStyleData(),
@@ -497,7 +497,7 @@ class DropdownButton2State<T> extends State<DropdownButton2<T>>
     }
     final Rect newRect = _getRect();
     //This avoid unnecessary rebuilds if _rect position hasn't changed
-    if (_rect.value!.top == newRect.top) {
+    if (_rect.value!.left == newRect.left) {
       return;
     }
     _rect.value = newRect;
@@ -588,14 +588,14 @@ class DropdownButton2State<T> extends State<DropdownButton2<T>>
   // _kDenseButtonHeight, but don't make it smaller than the text that it contains.
   // Similarly, we don't reduce the height of the button so much that its icon
   // would be clipped.
-  double get _denseButtonHeight {
+  double get _denseButtonWidth {
     // ignore: deprecated_member_use
     final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
     final double fontSize = _textStyle!.fontSize ??
         Theme.of(context).textTheme.titleMedium!.fontSize!;
     final double scaledFontSize = textScaleFactor * fontSize;
     return math.max(
-        scaledFontSize, math.max(_iconStyle.iconSize, _kDenseButtonHeight));
+        scaledFontSize, math.max(_iconStyle.iconSize, _kDenseButtonWidth));
   }
 
   Color get _iconColor {
@@ -699,8 +699,8 @@ class DropdownButton2State<T> extends State<DropdownButton2<T>>
         ? _kAlignedButtonPadding
         : _kUnalignedButtonPadding;
 
-    final buttonHeight =
-        _buttonStyle?.height ?? (widget.isDense ? _denseButtonHeight : null);
+    final buttonWidth =
+        _buttonStyle?.width ?? (widget.isDense ? _denseButtonWidth : null);
 
     final Widget innerItemsWidget = buttonItems.isEmpty
         ? const SizedBox.shrink()
@@ -723,7 +723,7 @@ class DropdownButton2State<T> extends State<DropdownButton2<T>>
               // which enhances the performance when dealing with big items list.
               // Note: Both buttonHeight & buttonWidth must be specified to avoid changing
               // button's size when selecting different items, which is a bad UX.
-              return buttonHeight != null && _buttonStyle?.width != null
+              return buttonWidth != null && _buttonStyle?.height != null
                   ? Align(
                       alignment: widget.alignment,
                       child: item,
@@ -731,13 +731,13 @@ class DropdownButton2State<T> extends State<DropdownButton2<T>>
                   : IndexedStack(
                       index: _selectedIndex ?? hintIndex,
                       alignment: widget.alignment,
-                      children: buttonHeight != null
+                      children: buttonWidth != null
                           ? buttonItems
                               .mapIndexed((item, index) => item)
                               .toList()
                           // TODO(Ahmed): use indexed from Flutter [Dart>=v3.0.0].
                           : buttonItems.mapIndexed((item, index) {
-                              return Column(
+                              return Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: <Widget>[item],
                               );
@@ -766,15 +766,15 @@ class DropdownButton2State<T> extends State<DropdownButton2<T>>
               // When buttonWidth & dropdownWidth is null, their width will be calculated
               // from the maximum width of menu items or the hint text (width of IndexedStack).
               // We need to add MenuHorizontalPadding so menu width adapts to max items width with padding properly
-              _buttonStyle?.width == null && _dropdownStyle.width == null
+              _buttonStyle?.height == null && _dropdownStyle.height == null
                   ? _getMenuPadding()
                       .resolve(Directionality.of(context))
                       .copyWith(top: 0, bottom: 0)
                   : EdgeInsets.zero,
             ),
-            height: buttonHeight,
-            width: _buttonStyle?.width,
-            child: Row(
+            width: buttonWidth,
+            height: _buttonStyle?.height,
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -804,17 +804,17 @@ class DropdownButton2State<T> extends State<DropdownButton2<T>>
     );
 
     if (!DropdownButtonHideUnderline.at(context)) {
-      final double bottom = widget.isDense ? 0.0 : 8.0;
+      final double right = widget.isDense ? 0.0 : 8.0;
       result = Stack(
         children: <Widget>[
           result,
           Positioned(
-            left: 0.0,
-            right: 0.0,
-            bottom: bottom,
+            top: 0.0,
+            bottom: 0.0,
+            right: right,
             child: widget.underline ??
                 Container(
-                  height: 1.0,
+                  width: 1.0,
                   decoration: const BoxDecoration(
                     border: Border(
                       bottom: BorderSide(

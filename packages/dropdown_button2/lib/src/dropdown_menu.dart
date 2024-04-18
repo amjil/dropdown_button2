@@ -5,11 +5,11 @@ SearchMatchFn<T> _defaultSearchMatchFn<T>() =>
         item.value.toString().toLowerCase().contains(searchValue.toLowerCase());
 
 class _MenuLimits {
-  const _MenuLimits(this.top, this.bottom, this.height, this.scrollOffset);
+  const _MenuLimits(this.left, this.right, this.width, this.scrollOffset);
 
-  final double top;
-  final double bottom;
-  final double height;
+  final double left;
+  final double right;
+  final double width;
   final double scrollOffset;
 }
 
@@ -145,7 +145,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
     final Widget dropdownMenu = Material(
       type: MaterialType.transparency,
       textStyle: route.style,
-      child: Column(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           if (searchData?.searchBarWidget != null) searchData!.searchBarWidget!,
@@ -181,6 +181,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
                         radius: _isIOS ? _scrollbarTheme?.radius : null,
                         child: ListView.separated(
                           // Ensure this always inherits the PrimaryScrollController
+                          scrollDirection: Axis.horizontal,
                           primary: true,
                           shrinkWrap: true,
                           padding:
@@ -190,9 +191,9 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
                           separatorBuilder: (context, index) =>
                               separator != null
                                   ? SizedBox(
-                                      height: separator!.intrinsicHeight
+                                      height: separator!.intrinsicWidth
                                           ? null
-                                          : separator!.height,
+                                          : separator!.width,
                                       child: separator,
                                     )
                                   : const SizedBox.shrink(),
@@ -215,7 +216,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           elevation: dropdownStyle.elevation,
           selectedIndex: route.selectedIndex,
           resize: _resize,
-          itemHeight: items[0].height,
+          itemWidth: items[0].width,
           dropdownDecoration: dropdownStyle.decoration,
         ),
         child: Semantics(
@@ -246,7 +247,7 @@ class _DropdownMenuPainter extends CustomPainter {
     this.elevation,
     this.selectedIndex,
     required this.resize,
-    required this.itemHeight,
+    required this.itemWidth,
     this.dropdownDecoration,
   })  : _painter = dropdownDecoration
                 ?.copyWith(
@@ -269,7 +270,7 @@ class _DropdownMenuPainter extends CustomPainter {
   final int? elevation;
   final int? selectedIndex;
   final Animation<double> resize;
-  final double itemHeight;
+  final double itemWidth;
   final BoxDecoration? dropdownDecoration;
 
   final BoxPainter _painter;
@@ -284,9 +285,9 @@ class _DropdownMenuPainter extends CustomPainter {
     );
 
     final Tween<double> bottom = Tween<double>(
-      begin: _clampDouble(top.begin! + itemHeight,
-          math.min(itemHeight, size.height), size.height),
-      end: size.height,
+      begin: _clampDouble(top.begin! + itemWidth,
+          math.min(itemWidth, size.width), size.width),
+      end: size.width,
     );
 
     final Rect rect = Rect.fromLTRB(
@@ -301,7 +302,7 @@ class _DropdownMenuPainter extends CustomPainter {
         oldPainter.elevation != elevation ||
         oldPainter.selectedIndex != selectedIndex ||
         oldPainter.dropdownDecoration != dropdownDecoration ||
-        oldPainter.itemHeight != itemHeight ||
+        oldPainter.itemWidth != itemWidth ||
         oldPainter.resize != resize;
   }
 }

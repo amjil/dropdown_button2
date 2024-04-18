@@ -18,9 +18,9 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     required this.menuItemStyle,
     required this.searchData,
     this.dropdownSeparator,
-  })  : itemHeights = addSeparatorsHeights(
-          itemHeights: items.map((item) => item.height).toList(),
-          separatorHeight: dropdownSeparator?.height,
+  })  : itemWidths = addSeparatorsWidths(
+          itemWidths: items.map((item) => item.width).toList(),
+          separatorWidth: dropdownSeparator?.width,
         ),
         barrierColor = barrierCoversButton ? barrierColor : null,
         _altBarrierColor = barrierColor;
@@ -38,7 +38,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final DropdownSearchData<T>? searchData;
   final DropdownSeparator<T>? dropdownSeparator;
 
-  final List<double> itemHeights;
+  final List<double> itemWidths;
   ScrollController? scrollController;
 
   @override
@@ -73,7 +73,8 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
           // TODO(Ahmed): use paddingOf/paddingOf [flutter>=v3.10.0].
           final MediaQueryData mediaQuery = MediaQuery.of(ctx);
           final BoxConstraints actualConstraints = constraints.copyWith(
-              maxHeight: constraints.maxHeight - mediaQuery.viewInsets.bottom);
+              maxWidth: constraints.maxWidth);
+              // maxWidth: constraints.maxWidth - mediaQuery.viewInsets.bottom);
           final EdgeInsets mediaQueryPadding =
               dropdownStyle.useSafeArea ? mediaQuery.padding : EdgeInsets.zero;
           return ValueListenableBuilder<Rect?>(
@@ -114,18 +115,18 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
 
   double getItemOffset(int index) {
     final double paddingTop = dropdownStyle.padding != null
-        ? dropdownStyle.padding!.resolve(null).top
-        : kMaterialListPadding.top;
+        ? dropdownStyle.padding!.resolve(null).left
+        : kMaterialListPadding.left;
     double offset = paddingTop;
 
     if (items.isNotEmpty && index > 0) {
       assert(
         items.length + (dropdownSeparator != null ? items.length - 1 : 0) ==
-            itemHeights.length,
+            itemWidths.length,
       );
-      offset += itemHeights
+      offset += itemWidths
           .sublist(0, index)
-          .reduce((double total, double height) => total + height);
+          .reduce((double total, double width) => total + width);
     }
 
     return offset;
@@ -135,49 +136,49 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   // for the ListView that contains the menu items.
   _MenuLimits getMenuLimits(
     Rect buttonRect,
-    double availableHeight,
+    double availableWidth,
     EdgeInsets mediaQueryPadding,
     int index,
   ) {
-    double maxHeight =
-        getMenuAvailableHeight(availableHeight, mediaQueryPadding);
+    double maxWidth =
+        getMenuAvailableWidth(availableWidth, mediaQueryPadding);
     // If a preferred MaxHeight is set by the user, use it instead of the available maxHeight.
-    final double? preferredMaxHeight = dropdownStyle.maxHeight;
-    if (preferredMaxHeight != null) {
-      maxHeight = math.min(maxHeight, preferredMaxHeight);
+    final double? preferredMaxWidth = dropdownStyle.maxWidth;
+    if (preferredMaxWidth != null) {
+      maxWidth = math.min(maxWidth, preferredMaxWidth);
     }
 
-    double actualMenuHeight =
-        dropdownStyle.padding?.vertical ?? kMaterialListPadding.vertical;
-    final double innerWidgetHeight = searchData?.searchBarWidgetHeight ?? 0.0;
-    actualMenuHeight += innerWidgetHeight;
+    double actualMenuWidth =
+        dropdownStyle.padding?.horizontal ?? kMaterialListPadding.horizontal;
+    final double innerWidgetWidth = searchData?.searchBarWidgetWidth ?? 0.0;
+    actualMenuWidth += innerWidgetWidth;
     if (items.isNotEmpty) {
-      actualMenuHeight +=
-          itemHeights.reduce((double total, double height) => total + height);
+      actualMenuWidth +=
+          itemWidths.reduce((double total, double width) => total + width);
     }
 
     // Use actualMenuHeight if it's less than maxHeight.
     // Otherwise, maxHeight will be used, as if there are too many elements in
     // the menu, we need to shrink it down so it is at most the maxHeight.
-    final double menuHeight = math.min(maxHeight, actualMenuHeight);
+    final double menuWidth = math.min(maxWidth, actualMenuWidth);
 
     // The computed top and bottom of the menu
-    double menuTop = dropdownStyle.isOverButton
-        ? buttonRect.top - dropdownStyle.offset.dy
-        : buttonRect.bottom - dropdownStyle.offset.dy;
-    double menuBottom = menuTop + menuHeight;
+    double menuLeft = dropdownStyle.isOverButton
+        ? buttonRect.left - dropdownStyle.offset.dx
+        : buttonRect.right - dropdownStyle.offset.dx;
+    double menuRight = menuLeft + menuWidth;
 
     // If the computed top or bottom of the menu are outside of the range
     // specified, we need to bring them into range.
     // `mediaQueryPadding` should be considered (equals to 0.0 if useSafeArea is false).
-    final double topLimit = mediaQueryPadding.top;
-    final double bottomLimit = availableHeight - mediaQueryPadding.bottom;
-    if (menuTop < topLimit) {
-      menuTop = topLimit;
-      menuBottom = menuTop + menuHeight;
-    } else if (menuBottom > bottomLimit) {
-      menuBottom = bottomLimit;
-      menuTop = menuBottom - menuHeight;
+    final double leftLimit = mediaQueryPadding.left;
+    final double rightLimit = availableWidth - mediaQueryPadding.right;
+    if (menuLeft < leftLimit) {
+      menuLeft = leftLimit;
+      menuRight = menuLeft + menuWidth;
+    } else if (menuRight > rightLimit) {
+      menuRight = rightLimit;
+      menuLeft = menuRight - menuWidth;
     }
 
     double scrollOffset = 0;
@@ -185,40 +186,40 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     // compute the scroll offset that will line the selected menu item up
     // with the select item. This is only done when the menu is first
     // shown - subsequently we leave the scroll offset where the user left it.
-    if (actualMenuHeight > maxHeight) {
+    if (actualMenuWidth > maxWidth) {
       //menuHeight & actualMenuHeight without innerWidget's Height
-      final double menuNetHeight = menuHeight - innerWidgetHeight;
-      final double actualMenuNetHeight = actualMenuHeight - innerWidgetHeight;
+      final double menuNetWidth = menuWidth - innerWidgetWidth;
+      final double actualMenuNetWidth = actualMenuWidth - innerWidgetWidth;
       // The offset should be zero if the selected item is in view at the beginning
       // of the menu. Otherwise, the scroll offset should center the item if possible.
-      final actualIndex = dropdownSeparator?.height != null ? index * 2 : index;
+      final actualIndex = dropdownSeparator?.width != null ? index * 2 : index;
       final double selectedItemOffset = getItemOffset(actualIndex);
       scrollOffset = math.max(
           0.0,
           selectedItemOffset -
-              (menuNetHeight / 2) +
-              (itemHeights[actualIndex] / 2));
+              (menuNetWidth / 2) +
+              (itemWidths[actualIndex] / 2));
       // If the selected item's scroll offset is greater than the maximum scroll offset,
       // set it instead to the maximum allowed scroll offset.
-      final double maxScrollOffset = actualMenuNetHeight - menuNetHeight;
+      final double maxScrollOffset = actualMenuNetWidth - menuNetWidth;
       scrollOffset = math.min(scrollOffset, maxScrollOffset);
     }
 
-    assert((menuBottom - menuTop - menuHeight).abs() < precisionErrorTolerance);
-    return _MenuLimits(menuTop, menuBottom, menuHeight, scrollOffset);
+    assert((menuRight - menuLeft - menuWidth).abs() < precisionErrorTolerance);
+    return _MenuLimits(menuLeft, menuRight, menuWidth, scrollOffset);
   }
 
   // The maximum height of a simple menu should be one or more rows less than
   // the view height. This ensures a tappable area outside of the simple menu
   // with which to dismiss the menu.
   //   -- https://material.io/design/components/menus.html#usage
-  double getMenuAvailableHeight(
-    double availableHeight,
+  double getMenuAvailableWidth(
+    double availableWidth,
     EdgeInsets mediaQueryPadding,
   ) {
     return math.max(
       0.0,
-      availableHeight - mediaQueryPadding.vertical - _kMenuItemHeight,
+      availableWidth - mediaQueryPadding.horizontal - _kMenuItemWidth,
     );
   }
 }
@@ -292,7 +293,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
               route: route,
               textDirection: textDirection,
               buttonRect: buttonRect,
-              availableHeight: constraints.maxHeight,
+              availableWidth: constraints.maxWidth,
               mediaQueryPadding: mediaQueryPadding,
             ),
             child: capturedThemes.wrap(menu),
@@ -307,34 +308,34 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
   _DropdownMenuRouteLayout({
     required this.route,
     required this.buttonRect,
-    required this.availableHeight,
+    required this.availableWidth,
     required this.mediaQueryPadding,
     required this.textDirection,
   });
 
   final _DropdownRoute<T> route;
   final Rect buttonRect;
-  final double availableHeight;
+  final double availableWidth;
   final EdgeInsets mediaQueryPadding;
   final TextDirection? textDirection;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    final double? itemWidth = route.dropdownStyle.width;
-    double maxHeight =
-        route.getMenuAvailableHeight(availableHeight, mediaQueryPadding);
-    final double? preferredMaxHeight = route.dropdownStyle.maxHeight;
-    if (preferredMaxHeight != null && preferredMaxHeight <= maxHeight) {
-      maxHeight = preferredMaxHeight;
+    final double? itemHeight = route.dropdownStyle.height;
+    double maxWidth =
+        route.getMenuAvailableWidth(availableWidth, mediaQueryPadding);
+    final double? preferredMaxWidth = route.dropdownStyle.maxWidth;
+    if (preferredMaxWidth != null && preferredMaxWidth <= maxWidth) {
+      maxWidth = preferredMaxWidth;
     }
     // The width of a menu should be at most the view width. This ensures that
     // the menu does not extend past the left and right edges of the screen.
-    final double width =
-        math.min(constraints.maxWidth, itemWidth ?? buttonRect.width);
+    final double height =
+        math.min(constraints.maxHeight, itemHeight ?? buttonRect.height);
     return BoxConstraints(
-      minWidth: width,
-      maxWidth: width,
-      maxHeight: maxHeight,
+      minHeight: height,
+      maxHeight: height,
+      maxWidth: maxWidth,
     );
   }
 
@@ -342,7 +343,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
   Offset getPositionForChild(Size size, Size childSize) {
     final _MenuLimits menuLimits = route.getMenuLimits(
       buttonRect,
-      availableHeight,
+      availableWidth,
       mediaQueryPadding,
       route.selectedIndex,
     );
@@ -353,59 +354,59 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
         // If the button was entirely on-screen, then verify
         // that the menu is also on-screen.
         // If the button was a bit off-screen, then, oh well.
-        assert(menuLimits.top >= 0.0);
-        assert(menuLimits.top + menuLimits.height <= size.height);
+        assert(menuLimits.left >= 0.0);
+        assert(menuLimits.left + menuLimits.width <= size.width);
       }
       return true;
     }());
     assert(textDirection != null);
 
     final Offset offset = route.dropdownStyle.offset;
-    final double left;
+    final double top;
 
     switch (route.dropdownStyle.direction) {
       case DropdownDirection.textDirection:
         switch (textDirection!) {
           case TextDirection.rtl:
-            left = _clampDouble(
-              buttonRect.right - childSize.width + offset.dx,
+            top = _clampDouble(
               0.0,
-              size.width - childSize.width,
+              buttonRect.bottom - childSize.height + offset.dy,
+              size.height - childSize.height,
             );
             break;
           case TextDirection.ltr:
-            left = _clampDouble(
-              buttonRect.left + offset.dx,
+            top = _clampDouble(
               0.0,
-              size.width - childSize.width,
+              buttonRect.top + offset.dy,
+              size.height - childSize.height,
             );
             break;
         }
         break;
-      case DropdownDirection.right:
-        left = _clampDouble(
-          buttonRect.left + offset.dx,
+      case DropdownDirection.bottom:
+        top = _clampDouble(
           0.0,
-          size.width - childSize.width,
+          buttonRect.top + offset.dy,
+          size.height - childSize.height,
         );
         break;
-      case DropdownDirection.left:
-        left = _clampDouble(
-          buttonRect.right - childSize.width + offset.dx,
+      case DropdownDirection.top:
+        top = _clampDouble(
           0.0,
-          size.width - childSize.width,
+          buttonRect.bottom - childSize.height + offset.dy,
+          size.height - childSize.height,
         );
         break;
       case DropdownDirection.center:
-        left = _clampDouble(
-          (size.width - childSize.width) / 2 + offset.dx,
+        top = _clampDouble(
           0.0,
-          size.width - childSize.width,
+          (size.height - childSize.height) / 2 + offset.dy,
+          size.height - childSize.height,
         );
         break;
     }
 
-    return Offset(left, menuLimits.top);
+    return Offset(menuLimits.left, top);
   }
 
   @override

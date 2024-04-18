@@ -7,7 +7,7 @@ class DropdownSeparator<T> extends DropdownItem<T> {
   /// Creates a dropdown separator.
   const DropdownSeparator({
     required super.child,
-    super.height,
+    super.width,
     super.enabled = false,
     super.key,
   });

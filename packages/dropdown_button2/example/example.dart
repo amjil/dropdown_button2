@@ -1,5 +1,6 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:mongol/mongol.dart';
 
 void main() {
   runApp(const MyApp());
@@ -44,7 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: DropdownButtonHideUnderline(
           child: DropdownButton2<String>(
             isExpanded: true,
-            hint: const Row(
+            hint: const Column(
               children: [
                 Icon(
                   Icons.list,
@@ -52,10 +53,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Colors.yellow,
                 ),
                 SizedBox(
-                  width: 4,
+                  height: 4,
                 ),
                 Expanded(
-                  child: Text(
+                  child: MongolText(
                     'Select Item',
                     style: TextStyle(
                       fontSize: 14,
@@ -70,8 +71,8 @@ class _MyHomePageState extends State<MyHomePage> {
             items: items
                 .map((String item) => DropdownItem<String>(
                       value: item,
-                      height: 40,
-                      child: Text(
+                      width: 40,
+                      child: MongolText(
                         item,
                         style: const TextStyle(
                           fontSize: 14,
@@ -87,9 +88,9 @@ class _MyHomePageState extends State<MyHomePage> {
               valueListenable.value = value;
             },
             buttonStyleData: ButtonStyleData(
-              height: 50,
-              width: 160,
-              padding: const EdgeInsets.only(left: 14, right: 14),
+              width: 50,
+              height: 160,
+              padding: const EdgeInsets.only(top: 14, bottom: 14),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
@@ -108,8 +109,8 @@ class _MyHomePageState extends State<MyHomePage> {
               iconDisabledColor: Colors.grey,
             ),
             dropdownStyleData: DropdownStyleData(
-              maxHeight: 200,
-              width: 200,
+              maxWidth: 200,
+              height: 200,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
                 color: Colors.redAccent,
@@ -122,7 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             menuItemStyleData: const MenuItemStyleData(
-              padding: EdgeInsets.only(left: 14, right: 14),
+              padding: EdgeInsets.only(top: 14, bottom: 14),
             ),
           ),
         ),
