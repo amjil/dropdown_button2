@@ -1,3 +1,21 @@
+## UNRELEASED
+
+- Enhance scroll position when using searchable dropdown, closes #285.
+- Temporarily fix ink splash gets displayed over search widget, closes #290.
+
+## 3.0.0-beta.16
+
+- Fix dropdown menu position when window changes horizontally, closes #243.
+
+## 3.0.0-beta.15
+
+- Always call `onChanged` when tapping enabled item, closes #275.
+
+## 3.0.0-beta.14
+
+- Optimize scroll performance when dealing with large items list.
+- Update SDK constraints: ">=3.2.0 <4.0.0"
+
 ## 3.0.0-beta.13
 
 - **BREAKING**: Add `openDropdownListenable` property that can be used to programmatically open the dropdown menu.

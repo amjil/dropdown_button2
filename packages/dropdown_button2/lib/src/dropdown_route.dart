@@ -6,6 +6,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     required this.buttonRect,
     required this.selectedIndex,
     required this.isNoSelectedItem,
+    required this.onChanged,
     required this.capturedThemes,
     required this.style,
     required this.barrierDismissible,
@@ -29,6 +30,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final ValueNotifier<Rect?> buttonRect;
   final int selectedIndex;
   final bool isNoSelectedItem;
+  final ValueChanged<T?>? onChanged;
   final CapturedThemes capturedThemes;
   final TextStyle style;
   final FocusNode parentFocusNode;
@@ -70,13 +72,17 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
           //Exclude BottomInset from maxHeight to avoid overlapping menu items
           //with keyboard when using searchable dropdown.
           //This will ensure menu is drawn in the actual available height.
-          // TODO(Ahmed): use paddingOf/paddingOf [flutter>=v3.10.0].
-          final MediaQueryData mediaQuery = MediaQuery.of(ctx);
+          final padding = MediaQuery.paddingOf(context);
+          final viewInsets = MediaQuery.viewInsetsOf(context);
           final BoxConstraints actualConstraints = constraints.copyWith(
+<<<<<<< HEAD
               maxWidth: constraints.maxWidth);
               // maxWidth: constraints.maxWidth - mediaQuery.viewInsets.bottom);
+=======
+              maxHeight: constraints.maxHeight - viewInsets.bottom);
+>>>>>>> b474e80527954a312fd861e841e7bfd726fc3912
           final EdgeInsets mediaQueryPadding =
-              dropdownStyle.useSafeArea ? mediaQuery.padding : EdgeInsets.zero;
+              dropdownStyle.useSafeArea ? padding : EdgeInsets.zero;
           return ValueListenableBuilder<Rect?>(
             valueListenable: buttonRect,
             builder: (BuildContext context, Rect? rect, _) {
@@ -124,12 +130,38 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
         items.length + (dropdownSeparator != null ? items.length - 1 : 0) ==
             itemWidths.length,
       );
+<<<<<<< HEAD
       offset += itemWidths
           .sublist(0, index)
           .reduce((double total, double width) => total + width);
+=======
+      if (searchData?.searchController?.text case final searchText?) {
+        final searchMatchFn =
+            searchData?.searchMatchFn ?? _defaultSearchMatchFn();
+        final selectedItemExist = searchMatchFn(items[index], searchText);
+        if (selectedItemExist) {
+          offset += _getSearchItemsHeight(index, searchText);
+        }
+      } else {
+        for (int i = 0; i < index; i++) {
+          offset += itemHeights[i];
+        }
+      }
+>>>>>>> b474e80527954a312fd861e841e7bfd726fc3912
     }
 
     return offset;
+  }
+
+  double _getSearchItemsHeight(int index, String searchText) {
+    var itemsHeight = 0.0;
+    final searchMatchFn = searchData?.searchMatchFn ?? _defaultSearchMatchFn();
+    for (int i = 0; i < index; i++) {
+      if (searchMatchFn(items[i], searchText)) {
+        itemsHeight += itemHeights[i];
+      }
+    }
+    return itemsHeight;
   }
 
   // Returns the vertical extent of the menu and the initial scrollOffset
@@ -153,8 +185,15 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     final double innerWidgetWidth = searchData?.searchBarWidgetWidth ?? 0.0;
     actualMenuWidth += innerWidgetWidth;
     if (items.isNotEmpty) {
+<<<<<<< HEAD
       actualMenuWidth +=
           itemWidths.reduce((double total, double width) => total + width);
+=======
+      final searchText = searchData?.searchController?.text;
+      actualMenuHeight += searchText != null
+          ? _getSearchItemsHeight(items.length, searchText)
+          : itemHeights.reduce((double total, double height) => total + height);
+>>>>>>> b474e80527954a312fd861e841e7bfd726fc3912
     }
 
     // Use actualMenuHeight if it's less than maxHeight.
@@ -368,14 +407,24 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
       case DropdownDirection.textDirection:
         switch (textDirection!) {
           case TextDirection.rtl:
+<<<<<<< HEAD
             top = _clampDouble(
+=======
+            left = clampDouble(
+              buttonRect.right - childSize.width + offset.dx,
+>>>>>>> b474e80527954a312fd861e841e7bfd726fc3912
               0.0,
               buttonRect.bottom - childSize.height + offset.dy,
               size.height - childSize.height,
             );
             break;
           case TextDirection.ltr:
+<<<<<<< HEAD
             top = _clampDouble(
+=======
+            left = clampDouble(
+              buttonRect.left + offset.dx,
+>>>>>>> b474e80527954a312fd861e841e7bfd726fc3912
               0.0,
               buttonRect.top + offset.dy,
               size.height - childSize.height,
@@ -383,22 +432,39 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
             break;
         }
         break;
+<<<<<<< HEAD
       case DropdownDirection.bottom:
         top = _clampDouble(
+=======
+      case DropdownDirection.right:
+        left = clampDouble(
+          buttonRect.left + offset.dx,
+>>>>>>> b474e80527954a312fd861e841e7bfd726fc3912
           0.0,
           buttonRect.top + offset.dy,
           size.height - childSize.height,
         );
         break;
+<<<<<<< HEAD
       case DropdownDirection.top:
         top = _clampDouble(
+=======
+      case DropdownDirection.left:
+        left = clampDouble(
+          buttonRect.right - childSize.width + offset.dx,
+>>>>>>> b474e80527954a312fd861e841e7bfd726fc3912
           0.0,
           buttonRect.bottom - childSize.height + offset.dy,
           size.height - childSize.height,
         );
         break;
       case DropdownDirection.center:
+<<<<<<< HEAD
         top = _clampDouble(
+=======
+        left = clampDouble(
+          (size.width - childSize.width) / 2 + offset.dx,
+>>>>>>> b474e80527954a312fd861e841e7bfd726fc3912
           0.0,
           (size.height - childSize.height) / 2 + offset.dy,
           size.height - childSize.height,

@@ -125,7 +125,10 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
   bool get _iOSThumbVisibility =>
       _scrollbarTheme?.thumbVisibility?.resolve(_states) ?? true;
 
-  DropdownSeparator<T>? get separator => widget.route.dropdownSeparator;
+  bool get _hasIntrinsicHeight =>
+      widget.route.items.any((item) => item.intrinsicHeight) ||
+      (widget.route.dropdownSeparator != null &&
+          widget.route.dropdownSeparator!.intrinsicHeight);
 
   @override
   Widget build(BuildContext context) {
@@ -142,6 +145,8 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
         MaterialLocalizations.of(context);
     final _DropdownRoute<T> route = widget.route;
 
+    final separator = widget.route.dropdownSeparator;
+
     final Widget dropdownMenu = Material(
       type: MaterialType.transparency,
       textStyle: route.style,
@@ -153,50 +158,79 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
             searchData!.noResultsWidget!
           else
             Flexible(
-              child: Padding(
-                padding: dropdownStyle.scrollPadding ?? EdgeInsets.zero,
-                child: ScrollConfiguration(
-                  // Dropdown menus should never overscroll or display an overscroll indicator.
-                  // Scrollbars are built-in below.
-                  // Platform must use Theme and ScrollPhysics must be Clamping.
-                  behavior: ScrollConfiguration.of(context).copyWith(
-                    scrollbars: false,
-                    overscroll: false,
-                    physics: const ClampingScrollPhysics(),
-                    platform: Theme.of(context).platform,
-                  ),
-                  child: PrimaryScrollController(
-                    controller: route.scrollController!,
-                    child: Theme(
-                      data: Theme.of(context).copyWith(
-                        scrollbarTheme: dropdownStyle.scrollbarTheme,
-                      ),
-                      child: Scrollbar(
-                        thumbVisibility:
-                            // ignore: avoid_bool_literals_in_conditional_expressions
-                            _isIOS ? _iOSThumbVisibility : true,
-                        thickness: _isIOS
-                            ? _scrollbarTheme?.thickness?.resolve(_states)
-                            : null,
-                        radius: _isIOS ? _scrollbarTheme?.radius : null,
-                        child: ListView.separated(
-                          // Ensure this always inherits the PrimaryScrollController
-                          scrollDirection: Axis.horizontal,
-                          primary: true,
-                          shrinkWrap: true,
-                          padding:
-                              dropdownStyle.padding ?? kMaterialListPadding,
-                          itemCount: _children.length,
-                          itemBuilder: (context, index) => _children[index],
-                          separatorBuilder: (context, index) =>
-                              separator != null
-                                  ? SizedBox(
-                                      height: separator!.intrinsicWidth
+              // This Material wrapper is temporary until it's fixed by flutter at:
+              // https://github.com/flutter/flutter/issues/86584
+              // https://github.com/flutter/flutter/issues/73315
+              child: Material(
+                type: MaterialType.transparency,
+                textStyle: route.style,
+                child: Padding(
+                  padding: dropdownStyle.scrollPadding ?? EdgeInsets.zero,
+                  child: ScrollConfiguration(
+                    // Dropdown menus should never overscroll or display an overscroll indicator.
+                    // Scrollbars are built-in below.
+                    // Platform must use Theme and ScrollPhysics must be Clamping.
+                    behavior: ScrollConfiguration.of(context).copyWith(
+                      scrollbars: false,
+                      overscroll: false,
+                      physics: const ClampingScrollPhysics(),
+                      platform: Theme.of(context).platform,
+                    ),
+                    child: PrimaryScrollController(
+                      controller: route.scrollController!,
+                      child: Theme(
+                        data: Theme.of(context).copyWith(
+                          scrollbarTheme: dropdownStyle.scrollbarTheme,
+                        ),
+                        child: Scrollbar(
+                          thumbVisibility:
+                              // ignore: avoid_bool_literals_in_conditional_expressions
+                              _isIOS ? _iOSThumbVisibility : true,
+                          thickness: _isIOS
+                              ? _scrollbarTheme?.thickness?.resolve(_states)
+                              : null,
+                          radius: _isIOS ? _scrollbarTheme?.radius : null,
+                          child: ListView.custom(
+                            // Ensure this always inherits the PrimaryScrollController
+                            primary: true,
+                            shrinkWrap: true,
+                            padding:
+                                dropdownStyle.padding ?? kMaterialListPadding,
+                            itemExtentBuilder: _hasIntrinsicHeight
+                                ? null
+                                : (index, dimensions) {
+                                    final childrenLength = separator == null
+                                        ? _children.length
+                                        : SeparatedSliverChildBuilderDelegate
+                                            .computeActualChildCount(
+                                                _children.length);
+                                    // TODO(Ahmed): Remove this when https://github.com/flutter/flutter/pull/142428
+                                    // is supported by the min version of the package [Flutter>=3.22.0].
+                                    if (index >= childrenLength) {
+                                      return 100;
+                                    }
+                                    return separator != null && index.isOdd
+                                        ? separator.height
+                                        : route.itemHeights[index];
+                                  },
+                            childrenDelegate: separator == null
+                                ? SliverChildBuilderDelegate(
+                                    (context, index) => _children[index],
+                                    childCount: _children.length,
+                                  )
+                                : SeparatedSliverChildBuilderDelegate(
+                                    itemCount: _children.length,
+                                    itemBuilder: (context, index) =>
+                                        _children[index],
+                                    separatorBuilder: (context, index) =>
+                                        SizedBox(
+                                      height: separator.intrinsicHeight
                                           ? null
-                                          : separator!.width,
+                                          : separator.height,
                                       child: separator,
-                                    )
-                                  : const SizedBox.shrink(),
+                                    ),
+                                  ),
+                          ),
                         ),
                       ),
                     ),
@@ -285,7 +319,7 @@ class _DropdownMenuPainter extends CustomPainter {
     );
 
     final Tween<double> bottom = Tween<double>(
-      begin: _clampDouble(top.begin! + itemWidth,
+      begin: clampDouble(top.begin! + itemWidth,
           math.min(itemWidth, size.width), size.width),
       end: size.width,
     );

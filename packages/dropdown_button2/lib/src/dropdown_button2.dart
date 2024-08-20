@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use_from_same_package
-
 /*
  * Created by AHMED ELSAYED on 30 Nov 2021.
  * email: ahmedelsaayid@gmail.com
@@ -11,6 +9,8 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'seperated_sliver_child_builder_delegate.dart';
 
 part 'dropdown_style_data.dart';
 part 'dropdown_route.dart';
@@ -535,12 +535,7 @@ class _DropdownButton2State<T> extends State<DropdownButton2<T>>
     if (_rect.value == null) {
       return;
     }
-    final Rect newRect = _getRect();
-    //This avoid unnecessary rebuilds if _rect position hasn't changed
-    if (_rect.value!.left == newRect.left) {
-      return;
-    }
-    _rect.value = newRect;
+    _rect.value = _getRect();
   }
 
   TextStyle? get _textStyle =>
@@ -582,6 +577,7 @@ class _DropdownButton2State<T> extends State<DropdownButton2<T>>
       buttonRect: _rect,
       selectedIndex: _selectedIndex ?? 0,
       isNoSelectedItem: _selectedIndex == null,
+      onChanged: widget.onChanged,
       capturedThemes:
           InheritedTheme.capture(from: context, to: navigator.context),
       style: _textStyle!,
@@ -611,10 +607,6 @@ class _DropdownButton2State<T> extends State<DropdownButton2<T>>
       _removeDropdownRoute();
       _isMenuOpen.value = false;
       widget.onMenuStateChange?.call(false);
-      if (!mounted || newValue == null) {
-        return;
-      }
-      widget.onChanged?.call(newValue.result);
     });
 
     widget.onMenuStateChange?.call(true);
@@ -667,14 +659,11 @@ class _DropdownButton2State<T> extends State<DropdownButton2<T>>
       widget.onChanged != null;
 
   Orientation _getOrientation(BuildContext context) {
-    // TODO(Ahmed): use maybeOrientationOf [flutter>=v3.10.0].
-    Orientation? result = MediaQuery.maybeOf(context)?.orientation;
+    Orientation? result = MediaQuery.maybeOrientationOf(context);
     if (result == null) {
-      // If there's no MediaQuery, then use the window aspect to determine
+      // If there's no MediaQuery, then use the current FlutterView to determine
       // orientation.
-      // TODO(Ahmed): use View.of(context) and update the comment [flutter>=v3.10.0].
-      // ignore: deprecated_member_use
-      final Size size = WidgetsBinding.instance.window.physicalSize;
+      final Size size = View.of(context).physicalSize;
       result = size.width > size.height
           ? Orientation.landscape
           : Orientation.portrait;
@@ -769,10 +758,7 @@ class _DropdownButton2State<T> extends State<DropdownButton2<T>>
                       alignment: widget.alignment,
                       children: buttonWidth != null
                           ? buttonItems
-                              .mapIndexed((item, index) => item)
-                              .toList()
-                          // TODO(Ahmed): use indexed from Flutter [Dart>=v3.0.0].
-                          : buttonItems.mapIndexed((item, index) {
+                          : buttonItems.map((item) {
                               return Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: <Widget>[item],
